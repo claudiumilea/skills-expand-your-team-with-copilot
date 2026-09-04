@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const displayName = document.getElementById("display-name");
   const logoutButton = document.getElementById("logout-button");
   const viewToggle = document.getElementById("view-toggle");
+  const viewToggleIcon = viewToggle?.querySelector(".view-toggle-icon");
+  const viewToggleLabel = viewToggle?.querySelector(".view-toggle-label");
   const themeToggle = document.getElementById("theme-toggle");
   const themeIcon = themeToggle?.querySelector(".theme-icon");
   const loginModal = document.getElementById("login-modal");
@@ -131,19 +133,16 @@ document.addEventListener("DOMContentLoaded", () => {
     currentViewMode = viewMode === "calendar" ? "calendar" : "card";
     if (viewToggle) {
       viewToggle.setAttribute(
-        "aria-label",
-        currentViewMode === "calendar"
-          ? "Switch to card view"
-          : "Switch to calendar view"
-      );
-      viewToggle.setAttribute(
         "aria-pressed",
         String(currentViewMode === "calendar")
       );
-      viewToggle.innerHTML =
-        currentViewMode === "calendar"
-          ? "<span>🗂️</span><span>Card View</span>"
-          : "<span>📅</span><span>Calendar View</span>";
+      if (viewToggleIcon) {
+        viewToggleIcon.textContent = currentViewMode === "calendar" ? "🗂️" : "📅";
+      }
+      if (viewToggleLabel) {
+        viewToggleLabel.textContent =
+          currentViewMode === "calendar" ? "Card View" : "Calendar View";
+      }
     }
     if (Object.keys(allActivities).length > 0) {
       displayFilteredActivities();
@@ -610,8 +609,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatMinutesLabel(totalMinutes) {
     const normalizedMinutes = Math.max(0, Math.min(totalMinutes, 24 * 60));
-    const hours = Math.floor(normalizedMinutes / 60);
-    const minutes = normalizedMinutes % 60;
+    const displayMinutes = normalizedMinutes === 24 * 60 ? 0 : normalizedMinutes;
+    const hours = Math.floor(displayMinutes / 60);
+    const minutes = displayMinutes % 60;
     const period = hours >= 12 ? "PM" : "AM";
     const twelveHour = hours % 12 || 12;
     return `${twelveHour}:${minutes.toString().padStart(2, "0")} ${period}`;
@@ -759,7 +759,11 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let minute = calendarStart; minute <= calendarEnd; minute += 60) {
       const timeLabel = document.createElement("div");
       timeLabel.className = "calendar-time-label";
-      timeLabel.style.top = `${(minute - calendarStart) * minuteHeight}px`;
+      const minuteOffset = (minute - calendarStart) * minuteHeight;
+      timeLabel.style.top = `${minuteOffset}px`;
+      if (minute === calendarEnd) {
+        timeLabel.classList.add("calendar-time-label-end");
+      }
       timeLabel.textContent = formatMinutesLabel(minute);
       timeAxis.appendChild(timeLabel);
     }
@@ -770,6 +774,15 @@ document.addEventListener("DOMContentLoaded", () => {
       dayColumn.className = "calendar-day-column";
 
       entriesByDay[day].forEach((entry) => {
+        const participantCount = Array.isArray(entry.details.participants)
+          ? entry.details.participants.length
+          : 0;
+        const maxParticipantsValue = Number(entry.details.max_participants);
+        const maxParticipants = Number.isFinite(maxParticipantsValue)
+          ? maxParticipantsValue
+          : null;
+        const maxParticipantsLabel =
+          maxParticipants === null ? "?" : String(maxParticipants);
         const columnWidth = 100 / entry.columnCount;
         const calendarEntry = document.createElement("div");
         calendarEntry.className = "calendar-entry";
@@ -780,16 +793,21 @@ document.addEventListener("DOMContentLoaded", () => {
         )}px`;
         calendarEntry.style.left = `calc(${columnWidth * entry.columnIndex}% + 2px)`;
         calendarEntry.style.width = `calc(${columnWidth}% - 4px)`;
+        const calendarEntrySummary = `${entry.name}. ${participantCount}/${maxParticipantsLabel} enrolled. ${formatSchedule(
+          entry.details
+        )}. ${entry.details.description}`;
         calendarEntry.title = `${entry.name}\n${entry.details.description}\n${formatSchedule(
           entry.details
-        )}\n${entry.details.participants.length}/${entry.details.max_participants} enrolled`;
+        )}\n${participantCount}/${maxParticipantsLabel} enrolled`;
+        calendarEntry.setAttribute("role", "note");
+        calendarEntry.setAttribute("aria-label", calendarEntrySummary);
 
         const nameText = document.createElement("span");
         nameText.className = "calendar-entry-name";
         nameText.textContent = entry.name;
         const enrollmentText = document.createElement("span");
         enrollmentText.className = "calendar-entry-enrollment";
-        enrollmentText.textContent = `${entry.details.participants.length}/${entry.details.max_participants}`;
+        enrollmentText.textContent = `${participantCount}/${maxParticipantsLabel}`;
 
         calendarEntry.appendChild(nameText);
         calendarEntry.appendChild(enrollmentText);

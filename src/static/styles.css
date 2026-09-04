@@ -226,6 +226,10 @@ section h3 {
   color: var(--text-secondary);
 }
 
+.calendar-time-label-end {
+  transform: translateY(-100%);
+}
+
 .calendar-day-column {
   position: relative;
   height: var(--calendar-height);
