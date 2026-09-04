@@ -502,6 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formattedSchedule = formatSchedule(details);
     const shareUrl = new URL(window.location.href);
     shareUrl.searchParams.set("activity", name);
+    shareUrl.hash = "";
     const activityShareUrl = shareUrl.toString();
     const shareMessage = `Check out ${name} at ${schoolName}: ${formattedSchedule}.`;
     const encodedShareUrl = encodeURIComponent(activityShareUrl);
