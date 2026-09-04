@@ -178,6 +178,32 @@ section h3 {
   width: 100%;
 }
 
+#activities-list.grouped-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-group {
+  border-top: 1px solid var(--border-light);
+  padding-top: 8px;
+}
+
+.activity-group:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.activity-group-heading {
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.activity-group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
 .activity-card {
   padding: 12px;
   border: 1px solid var(--border);
@@ -588,6 +614,16 @@ footer {
   font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.group-by-select {
+  width: 100%;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  padding: 6px 8px;
 }
 
 .category-filter.active,
