@@ -73,6 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     if (activeDifficultyFilter) {
       currentDifficulty = activeDifficultyFilter.dataset.difficulty;
+      difficultyFilters.forEach((btn) => {
+        btn.setAttribute("aria-pressed", btn === activeDifficultyFilter);
+      });
     }
   }
 
@@ -676,8 +679,12 @@ document.addEventListener("DOMContentLoaded", () => {
   difficultyFilters.forEach((button) => {
     button.addEventListener("click", () => {
       // Update active class
-      difficultyFilters.forEach((btn) => btn.classList.remove("active"));
+      difficultyFilters.forEach((btn) => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-pressed", "false");
+      });
       button.classList.add("active");
+      button.setAttribute("aria-pressed", "true");
 
       // Update current difficulty filter and fetch activities
       currentDifficulty = button.dataset.difficulty;
