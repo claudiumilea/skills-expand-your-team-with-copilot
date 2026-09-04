@@ -6,6 +6,7 @@ A super simple website application that allows students to view and sign up for 
 
 - View all available extracurricular activities
 - Filter activities by day, time, and difficulty level
+- Group filtered activities by category
 - Sign up for activities
 
 ## Development Guide

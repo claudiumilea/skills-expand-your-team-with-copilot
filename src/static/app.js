@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const dayFilters = document.querySelectorAll(".day-filter");
   const timeFilters = document.querySelectorAll(".time-filter");
   const difficultyFilters = document.querySelectorAll(".difficulty-filter");
+  const groupBySelect = document.getElementById("group-by");
 
   // Authentication elements
   const loginButton = document.getElementById("login-button");
@@ -44,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDay = "";
   let currentTimeRange = "";
   let currentDifficulty = "";
+  let currentGroupBy = "";
 
   // Authentication state
   let currentUser = null;
@@ -81,6 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
           btn === activeDifficultyFilter ? "true" : "false"
         );
       });
+    }
+
+    if (groupBySelect) {
+      currentGroupBy = groupBySelect.value;
     }
   }
 
@@ -484,7 +490,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activitiesList.innerHTML = "";
 
     // Apply client-side filtering - this handles category filter and search, plus weekend filter
-    let filteredActivities = {};
+    const filteredActivities = [];
 
     Object.entries(allActivities).forEach(([name, details]) => {
       const activityType = getActivityType(name, details.description);
@@ -521,11 +527,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Activity passed all filters, add to filtered list
-      filteredActivities[name] = details;
+      filteredActivities.push([name, details]);
     });
 
     // Check if there are any results
-    if (Object.keys(filteredActivities).length === 0) {
+    if (filteredActivities.length === 0) {
+      activitiesList.classList.remove("grouped-view");
       activitiesList.innerHTML = `
         <div class="no-results">
           <h4>No activities found</h4>
@@ -535,9 +542,46 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Display filtered activities
-    Object.entries(filteredActivities).forEach(([name, details]) => {
-      renderActivityCard(name, details);
+    if (currentGroupBy !== "category") {
+      activitiesList.classList.remove("grouped-view");
+      filteredActivities.forEach(([name, details]) => {
+        renderActivityCard(name, details);
+      });
+      return;
+    }
+
+    activitiesList.classList.add("grouped-view");
+    const groupedActivities = {};
+    filteredActivities.forEach(([name, details]) => {
+      const activityType = getActivityType(name, details.description);
+      if (!groupedActivities[activityType]) {
+        groupedActivities[activityType] = [];
+      }
+      groupedActivities[activityType].push([name, details]);
+    });
+
+    Object.keys(activityTypes).forEach((group) => {
+      const groupActivities = groupedActivities[group];
+      if (!groupActivities || groupActivities.length === 0) {
+        return;
+      }
+
+      const groupSection = document.createElement("section");
+      groupSection.className = "activity-group";
+
+      const groupHeading = document.createElement("h4");
+      groupHeading.className = "activity-group-heading";
+      groupHeading.textContent = activityTypes[group].label;
+
+      const groupCards = document.createElement("div");
+      groupCards.className = "activity-group-grid";
+      groupSection.appendChild(groupHeading);
+      groupSection.appendChild(groupCards);
+      activitiesList.appendChild(groupSection);
+
+      groupActivities.forEach(([name, details]) => {
+        renderActivityCard(name, details, groupCards);
+      });
     });
   }
 
@@ -548,7 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return div.innerHTML;
   }
 
-  function renderActivityCard(name, details) {
+  function renderActivityCard(name, details, targetContainer = activitiesList) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
 
@@ -670,7 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    activitiesList.appendChild(activityCard);
+    targetContainer.appendChild(activityCard);
   }
 
   // Event listeners for search and filter
@@ -750,6 +794,13 @@ document.addEventListener("DOMContentLoaded", () => {
       fetchActivities();
     });
   });
+
+  if (groupBySelect) {
+    groupBySelect.addEventListener("change", (event) => {
+      currentGroupBy = event.target.value;
+      displayFilteredActivities();
+    });
+  }
 
   // Open registration modal
   function openRegistrationModal(activityName) {
