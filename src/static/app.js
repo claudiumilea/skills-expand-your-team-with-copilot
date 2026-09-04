@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
-  let currentDifficulty = "unspecified";
+  let currentDifficulty = "";
 
   // Authentication state
   let currentUser = null;

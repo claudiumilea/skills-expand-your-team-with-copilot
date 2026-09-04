@@ -29,6 +29,7 @@ def get_activities(
     - end_time: Filter activities ending at or before this time (24-hour format, e.g., '17:00')
     - difficulty_level: Filter activities by level ('Beginner', 'Intermediate', 'Advanced').
       Use 'unspecified' to return only activities without explicit difficulty level.
+      Use 'all' (or omit the parameter) to return activities from every level.
     """
     # Build the query based on provided filters
     query = {}
@@ -44,14 +45,16 @@ def get_activities(
 
     if difficulty_level:
         valid_levels = {"Beginner", "Intermediate", "Advanced"}
-        if difficulty_level in {"unspecified", "all"}:
+        if difficulty_level == "unspecified":
             query["difficulty_level"] = {"$exists": False}
+        elif difficulty_level == "all":
+            pass
         elif difficulty_level in valid_levels:
             query["difficulty_level"] = difficulty_level
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Invalid difficulty_level. Use 'unspecified', 'Beginner', 'Intermediate', or 'Advanced'."
+                detail="Invalid difficulty_level. Use 'all', 'unspecified', 'Beginner', 'Intermediate', or 'Advanced'."
             )
     
     # Query the database
