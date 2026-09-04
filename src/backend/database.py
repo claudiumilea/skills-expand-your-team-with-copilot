@@ -21,8 +21,11 @@ def init_database():
     """Initialize database if empty"""
 
     # Initialize any missing activities
+    existing_activity_ids = {
+        activity["_id"] for activity in activities_collection.find({}, {"_id": 1})
+    }
     for name, details in initial_activities.items():
-        if activities_collection.count_documents({"_id": name}) == 0:
+        if name not in existing_activity_ids:
             activities_collection.insert_one({"_id": name, **details})
             
     # Initialize teacher accounts if empty
