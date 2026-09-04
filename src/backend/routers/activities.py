@@ -46,7 +46,11 @@ def get_activities(
     if difficulty_level:
         valid_levels = {"Beginner", "Intermediate", "Advanced"}
         if difficulty_level == "unspecified":
-            query["difficulty_level"] = {"$exists": False}
+            query["$or"] = [
+                {"difficulty_level": {"$exists": False}},
+                {"difficulty_level": None},
+                {"difficulty_level": ""}
+            ]
         elif difficulty_level == "all":
             pass
         elif difficulty_level in valid_levels:
