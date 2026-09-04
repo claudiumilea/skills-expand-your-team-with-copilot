@@ -29,7 +29,14 @@ def init_database():
             activities_collection.insert_one({"_id": name, **details})
         elif "difficulty_level" in details:
             activities_collection.update_one(
-                {"_id": name, "difficulty_level": {"$exists": False}},
+                {
+                    "_id": name,
+                    "$or": [
+                        {"difficulty_level": {"$exists": False}},
+                        {"difficulty_level": None},
+                        {"difficulty_level": ""}
+                    ]
+                },
                 {"$set": {"difficulty_level": details["difficulty_level"]}}
             )
             

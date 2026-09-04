@@ -490,6 +490,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Function to render a single activity card
+  function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value ?? "";
+    return div.innerHTML;
+  }
+
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
@@ -515,8 +521,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const safeDifficultyLevel = escapeHtml(details.difficulty_level);
     const difficultyHtml = details.difficulty_level
-      ? `<p><strong>Difficulty:</strong> ${details.difficulty_level}</p>`
+      ? `<p><strong>Difficulty:</strong> ${safeDifficultyLevel}</p>`
       : "";
 
     // Create activity tag
