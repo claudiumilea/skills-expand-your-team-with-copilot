@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categoryFilters = document.querySelectorAll(".category-filter");
   const dayFilters = document.querySelectorAll(".day-filter");
   const timeFilters = document.querySelectorAll(".time-filter");
+  const difficultyFilters = document.querySelectorAll(".difficulty-filter");
 
   // Authentication elements
   const loginButton = document.getElementById("login-button");
@@ -42,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
+  let currentDifficulty = "";
 
   // Authentication state
   let currentUser = null;
@@ -65,6 +67,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeTimeFilter = document.querySelector(".time-filter.active");
     if (activeTimeFilter) {
       currentTimeRange = activeTimeFilter.dataset.time;
+    }
+
+    // Initialize difficulty filter
+    const activeDifficultyFilter = document.querySelector(
+      ".difficulty-filter.active"
+    );
+    if (activeDifficultyFilter) {
+      currentDifficulty = activeDifficultyFilter.dataset.difficulty;
+      difficultyFilters.forEach((btn) => {
+        btn.setAttribute(
+          "aria-pressed",
+          btn === activeDifficultyFilter ? "true" : "false"
+        );
+      });
     }
   }
 
@@ -438,6 +454,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      // Handle difficulty filter
+      if (currentDifficulty) {
+        queryParams.push(
+          `difficulty_level=${encodeURIComponent(currentDifficulty)}`
+        );
+      }
+
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const response = await fetch(`/activities${queryString}`);
@@ -519,6 +542,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Function to render a single activity card
+  function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value ?? "";
+    return div.innerHTML;
+  }
+
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
@@ -544,6 +573,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const safeName = escapeHtml(name);
+    const safeDescription = escapeHtml(details.description);
+    const safeFormattedSchedule = escapeHtml(formattedSchedule);
+    const safeDifficultyLevel = escapeHtml(details.difficulty_level);
+    const difficultyHtml = details.difficulty_level
+      ? `<p><strong>Difficulty:</strong> ${safeDifficultyLevel}</p>`
+      : "";
 
     // Create activity tag
     const tagHtml = `
@@ -567,10 +603,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activityCard.innerHTML = `
       ${tagHtml}
-      <h4>${name}</h4>
-      <p>${details.description}</p>
+      <h4>${safeName}</h4>
+      <p>${safeDescription}</p>
+      ${difficultyHtml}
       <p class="tooltip">
-        <strong>Schedule:</strong> ${formattedSchedule}
+        <strong>Schedule:</strong> ${safeFormattedSchedule}
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
@@ -683,6 +720,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Update current time filter and fetch activities
       currentTimeRange = button.dataset.time;
+      fetchActivities();
+    });
+  });
+
+  // Add event listeners for difficulty filter buttons
+  difficultyFilters.forEach((button) => {
+    button.addEventListener("click", () => {
+      const isCurrentlyActive = button.classList.contains("active");
+
+      if (isCurrentlyActive) {
+        button.classList.remove("active");
+        button.setAttribute("aria-pressed", "false");
+        currentDifficulty = "";
+        fetchActivities();
+        return;
+      }
+
+      // Update active class
+      difficultyFilters.forEach((btn) => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-pressed", "false");
+      });
+      button.classList.add("active");
+      button.setAttribute("aria-pressed", "true");
+
+      // Update current difficulty filter and fetch activities
+      currentDifficulty = button.dataset.difficulty;
       fetchActivities();
     });
   });
