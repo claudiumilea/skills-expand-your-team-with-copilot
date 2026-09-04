@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
+  const schoolName =
+    document.querySelector("header h1")?.textContent?.trim() || "our school";
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -498,10 +500,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
-    const activityShareUrl = `${window.location.origin}${
-      window.location.pathname
-    }?activity=${encodeURIComponent(name)}`;
-    const shareMessage = `Check out ${name} at Mergington High School: ${formattedSchedule}.`;
+    const shareUrl = new URL(window.location.href);
+    shareUrl.searchParams.set("activity", name);
+    const activityShareUrl = shareUrl.toString();
+    const shareMessage = `Check out ${name} at ${schoolName}: ${formattedSchedule}.`;
     const encodedShareUrl = encodeURIComponent(activityShareUrl);
     const encodedShareMessage = encodeURIComponent(shareMessage);
 
@@ -541,7 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
             href="https://www.facebook.com/sharer/sharer.php?u=${encodedShareUrl}"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Share ${name} on Facebook"
+            aria-label="Share this activity on Facebook"
           >
             Facebook
           </a>
@@ -550,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
             href="https://twitter.com/intent/tweet?text=${encodedShareMessage}&url=${encodedShareUrl}"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Share ${name} on X"
+            aria-label="Share this activity on X"
           >
             X
           </a>
@@ -561,7 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
             )}"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Share ${name} on WhatsApp"
+            aria-label="Share this activity on WhatsApp"
           >
             WhatsApp
           </a>
