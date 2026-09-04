@@ -678,6 +678,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add event listeners for difficulty filter buttons
   difficultyFilters.forEach((button) => {
     button.addEventListener("click", () => {
+      const isCurrentlyActive = button.classList.contains("active");
+
+      if (isCurrentlyActive) {
+        button.classList.remove("active");
+        button.setAttribute("aria-pressed", "false");
+        currentDifficulty = "";
+        fetchActivities();
+        return;
+      }
+
       // Update active class
       difficultyFilters.forEach((btn) => {
         btn.classList.remove("active");
