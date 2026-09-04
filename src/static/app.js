@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const displayName = document.getElementById("display-name");
   const logoutButton = document.getElementById("logout-button");
   const themeToggle = document.getElementById("theme-toggle");
+  const themeIcon = themeToggle?.querySelector(".theme-icon");
   const loginModal = document.getElementById("login-modal");
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
@@ -212,23 +213,46 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function setTheme(theme) {
-    const isDark = theme === "dark";
-    document.documentElement.toggleAttribute("data-theme", isDark);
-    themeToggle.querySelector(".theme-icon").textContent = isDark ? "☀️" : "🌙";
-    themeToggle.setAttribute(
-      "aria-label",
-      isDark ? "Switch to light mode" : "Switch to dark mode"
-    );
-    localStorage.setItem("theme", isDark ? "dark" : "light");
+    const normalizedTheme = theme === "dark" ? "dark" : "light";
+    const isDark = normalizedTheme === "dark";
+    document.documentElement.setAttribute("data-theme", normalizedTheme);
+    if (themeIcon) {
+      themeIcon.textContent = isDark ? "☀️" : "🌙";
+    }
+    if (themeToggle) {
+      themeToggle.setAttribute(
+        "aria-label",
+        isDark ? "Switch to light mode" : "Switch to dark mode"
+      );
+      themeToggle.setAttribute("aria-pressed", String(isDark));
+    }
+    setStoredTheme(normalizedTheme);
+  }
+
+  function getStoredTheme() {
+    try {
+      return localStorage.getItem("theme");
+    } catch (error) {
+      console.warn("Theme preference unavailable in localStorage.", error);
+      return null;
+    }
+  }
+
+  function setStoredTheme(theme) {
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (error) {
+      console.warn("Unable to persist theme preference.", error);
+    }
   }
 
   function initializeTheme() {
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = getStoredTheme();
+    const prefersDark =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
     const preferredTheme =
-      savedTheme ||
-      (window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light");
+      savedTheme || (prefersDark ? "dark" : "light");
     setTheme(preferredTheme);
   }
 
@@ -885,13 +909,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize app
   initializeTheme();
-  themeToggle.addEventListener("click", () => {
-    const nextTheme =
-      document.documentElement.getAttribute("data-theme") === "dark"
-        ? "light"
-        : "dark";
-    setTheme(nextTheme);
-  });
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      const nextTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      setTheme(nextTheme);
+    });
+  }
   checkAuthentication();
   initializeFilters();
   fetchActivities();
