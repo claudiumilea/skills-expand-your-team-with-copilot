@@ -521,6 +521,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const safeName = escapeHtml(name);
+    const safeDescription = escapeHtml(details.description);
+    const safeFormattedSchedule = escapeHtml(formattedSchedule);
     const safeDifficultyLevel = escapeHtml(details.difficulty_level);
     const difficultyHtml = details.difficulty_level
       ? `<p><strong>Difficulty:</strong> ${safeDifficultyLevel}</p>`
@@ -548,11 +551,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activityCard.innerHTML = `
       ${tagHtml}
-      <h4>${name}</h4>
-      <p>${details.description}</p>
+      <h4>${safeName}</h4>
+      <p>${safeDescription}</p>
       ${difficultyHtml}
       <p class="tooltip">
-        <strong>Schedule:</strong> ${formattedSchedule}
+        <strong>Schedule:</strong> ${safeFormattedSchedule}
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}

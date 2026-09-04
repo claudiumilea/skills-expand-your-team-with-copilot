@@ -28,7 +28,7 @@ def init_database():
         if name not in existing_activity_ids:
             activities_collection.insert_one({"_id": name, **details})
         elif "difficulty_level" in details:
-            activities_collection.update_one(
+            activities_collection.update_many(
                 {
                     "_id": name,
                     "$or": [
